@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(navController: NavController) {
     var visible by remember { mutableStateOf(true) }
-    var text by remember { mutableStateOf("Hello") }
+
 
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -73,25 +73,30 @@ fun MainScreen(navController: NavController) {
                     onClick = { visible = !visible }
                 ) { Text("Button 2") }
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            TextField(
-                value = text,
-                onValueChange = { text = it },
-                label = { Text("Label") }
-            )
         }
     }
 }
 
 @Composable
 fun SettingsScreen(navController: NavController) {
+    var text by remember { mutableStateOf("Hello") }
+
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             Text("Settings screen")
-            Button(
-                modifier = Modifier.weight(1f),
-                onClick = { navController.popBackStack() },
-            ) { Text("Back") }
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = { navController.popBackStack() },
+                ) { Text("Back") }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            TextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text("Label") }
+            )
         }
     }
 }
