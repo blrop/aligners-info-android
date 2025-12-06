@@ -1,5 +1,6 @@
 package dev.isln.alignersinfo
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,11 +22,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.core.content.edit
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,7 +82,11 @@ fun MainScreen(navController: NavController) {
 
 @Composable
 fun SettingsScreen(navController: NavController) {
-    var text by remember { mutableStateOf("Hello") }
+    val context = LocalContext.current
+    val sharedPreferences = remember { context.getSharedPreferences("AlignersInfoPrefs", Context.MODE_PRIVATE) }
+    var text by remember {
+        mutableStateOf(sharedPreferences.getString("saved_text", "Hello") ?: "Hello")
+    }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -94,7 +101,10 @@ fun SettingsScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(12.dp))
             TextField(
                 value = text,
-                onValueChange = { text = it },
+                onValueChange = {
+                    text = it
+                    sharedPreferences.edit { putString("saved_text", it) }
+                },
                 label = { Text("Label") }
             )
         }
