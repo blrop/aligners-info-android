@@ -8,41 +8,22 @@ import java.time.ZonedDateTime
 import kotlin.math.round
 import kotlin.time.ExperimentalTime
 
-val secInDay = 60 * 60 * 24
+class MainScreenParams (
+    var percent: String = "",
+    var daysPassed: String = "",
+    var daysTotal: String = "",
+    var current: String = "",
+    var total: String = "",
+    var replaceInDays: String = "",
+    var replaceDate: String = "",
 
-var _error = ""
-var _errorMessage = ""
-var _replaceWarning = ""
-var _replaceInDays = ""
-var _replaceDate = ""
-var _current = ""
-var _total = ""
-var _percent = ""
-var _daysPassed = ""
-var _daysTotal = ""
-var _mainBlock = ""
-var _completedBlock = ""
+    var errorMessage: String = "",
+    var showReplaceWarning: Boolean = false,
+    var showMainBlock: Boolean = true,
+    var showCompletedBlock: Boolean = false,
+)
 
-fun setMainBlockVisibility(visible: Boolean) {
-    _mainBlock = if (visible) "visible" else "hidden"
-}
-
-fun setCompletedBlockVisibility(visible: Boolean) {
-    _completedBlock = if (visible) "visible" else "hidden"
-}
-
-fun setReplaceWarningVisibility(visible: Boolean) {
-    _replaceWarning = if (visible) "visible" else "hidden"
-}
-
-fun showError(message: String) {
-    _error = "visible"
-    _errorMessage = message
-}
-
-fun zeroPad(n: Int, digits: Int): String {
-    return n.toString().padStart(digits, '0')
-}
+const val SEC_IN_DAY = 86400
 
 fun getTimeByString(dateString: String): Long {
     val zoneId = ZoneId.systemDefault()
@@ -84,7 +65,7 @@ fun getPreviousData(allStartDates: List<String>, allChangeIntervals:List<String>
         val changeInterval = changeIntervals[i - 1].toInt()
 
         val msCount = nextStartTime - startTime
-        val daysCount = (msCount / secInDay).toInt()
+        val daysCount = (msCount / SEC_IN_DAY).toInt()
         val alignersCount = daysCount / changeInterval
 
         allPreviousDays += daysCount
@@ -95,30 +76,32 @@ fun getPreviousData(allStartDates: List<String>, allChangeIntervals:List<String>
 }
 
 @OptIn(ExperimentalTime::class)
-fun main() {
+fun calculate(): MainScreenParams {
+    val params = MainScreenParams()
+
     val startDatesRaw = "2025-05-15,2025-12-01"
     val changeIntervalsRaw = "10,7"
     val totalAlignersRaw = "52"
     val totalAligners = totalAlignersRaw.toInt()
 
     if (startDatesRaw.isEmpty() || changeIntervalsRaw.isEmpty() || totalAlignersRaw.isEmpty()) {
-        showError("not enough parameters")
-        return
+        params.errorMessage = "not enough parameters"
+        return params
     }
 
     val startDates = startDatesRaw.split(",")
     val changeIntervals = changeIntervalsRaw.split(",")
 
     if (startDates.size != changeIntervals.size) {
-        showError("incorrect parameters")
-        return
+        params.errorMessage = "incorrect parameters"
+        return params
     }
 
     val indexOfCurrentPeriod = getCurrentPeriodIndex(startDates)
 
     if (indexOfCurrentPeriod < 0) {
-        showError("all dates are in future")
-        return
+        params.errorMessage = "all dates are in future"
+        return params
     }
 
     val zoneId = ZoneId.systemDefault()
@@ -129,7 +112,7 @@ fun main() {
 
     val msInUse = currentTime - startTime
     val (allPreviousDays, allPreviousAlignersCount) = getPreviousData(startDates, changeIntervals, indexOfCurrentPeriod)
-    val currentTotalDaysInUse = msInUse / secInDay
+    val currentTotalDaysInUse = msInUse / SEC_IN_DAY
     val totalDaysInUse = allPreviousDays + currentTotalDaysInUse
 
     val changeInterval = changeIntervals[indexOfCurrentPeriod].toInt()
@@ -139,8 +122,8 @@ fun main() {
     val activeDays = currentTotalDaysInUse % changeInterval
     val replaceInDays = changeInterval - activeDays
 
-    val lastReplaceTime = currentTime - (msInUse % (secInDay * changeInterval))
-    val replaceTime = lastReplaceTime + secInDay * changeInterval
+    val lastReplaceTime = currentTime - (msInUse % (SEC_IN_DAY * changeInterval))
+    val replaceTime = lastReplaceTime + SEC_IN_DAY * changeInterval
 
     val d = Instant.ofEpochSecond(replaceTime)
     val replaceDate = LocalDate.from(ZonedDateTime.parse(d.toString()))
@@ -149,40 +132,28 @@ fun main() {
 
     val completed = totalDaysInUse >= totalDays
 
-    _percent = if (percent > 100) "100" else percent.toString()
-    _daysPassed = totalDaysInUse.toString()
-    _daysTotal = totalDays.toString()
+    params.percent = if (percent > 100) "100" else percent.toString()
+    params.daysPassed = totalDaysInUse.toString()
+    params.daysTotal = totalDays.toString()
 
     if (completed) {
-        setMainBlockVisibility(false)
-        setCompletedBlockVisibility(true)
-        return
+        params.showMainBlock = false
+        params.showCompletedBlock = true
+        return params
     }
 
     if (activeDays == 0L) {
-        setReplaceWarningVisibility(true)
+        params.showReplaceWarning = true
     }
 
-    _current = currentAlignerIndex.toString()
-    _total = totalAligners.toString()
+    params.current = currentAlignerIndex.toString()
+    params.total = totalAligners.toString()
 
-    _replaceInDays = replaceInDays.toString()
-    val day = zeroPad(replaceDate.dayOfMonth, 2)
-    val month = zeroPad(replaceDate.monthValue, 2)
+    params.replaceInDays = replaceInDays.toString()
+    val day = replaceDate.dayOfMonth.toString().padStart(2, '0')
+    val month = replaceDate.monthValue.toString().padStart(2, '0')
     val year = replaceDate.year
-    _replaceDate = "$day.$month.$year"
+    params.replaceDate = "$day.$month.$year"
 
-    println("_percent=$_percent")
-    println("_daysPassed=$_daysPassed")
-    println("_daysTotal=$_daysTotal")
-    println("_current=$_current")
-    println("_total=$_total")
-    println("_replaceInDays=$_replaceInDays")
-    println("_replaceDate=$_replaceDate")
-    println("-----")
-    println("_mainBlock=$_mainBlock")
-    println("_completedBlock=$_completedBlock")
-    println("_replaceWarning=$_replaceWarning")
-    println("_error=$_error")
-    println("_errorMessage=$_errorMessage")
+    return params
 }

@@ -37,6 +37,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val params = calculate()
+
         enableEdgeToEdge()
 
         setContent {
@@ -46,7 +48,7 @@ class MainActivity : ComponentActivity() {
                 startDestination = "MainScreen",
                 builder = {
                     composable("MainScreen") {
-                        MainScreen(navHostController)
+                        MainScreen(navHostController, params)
                     }
                     composable("SettingsScreen") {
                         SettingsScreen(navHostController)
@@ -58,8 +60,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(navController: NavController) {
-    Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
+fun MainScreen(navController: NavController, params: MainScreenParams) {
+    Scaffold(modifier = Modifier.fillMaxSize().padding(12.dp)) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             Text("MainScreen")
             Spacer(modifier = Modifier.height(12.dp))
@@ -70,6 +72,26 @@ fun MainScreen(navController: NavController) {
                 ) { Text("Settings") }
             }
             Spacer(modifier = Modifier.height(12.dp))
+            Text("Percent: " + params.percent)
+            Text("Days passed: " + params.daysPassed)
+            Text("Days total: " + params.daysTotal)
+            Text("Current: " + params.current)
+            Text("Total: " + params.total)
+            Text("Replace in days: " + params.replaceInDays)
+            Text("Replace date: " + params.replaceDate)
+            Spacer(modifier = Modifier.height(12.dp))
+            if (params.errorMessage.isNotEmpty()) {
+                Text("Error: " + params.errorMessage)
+            }
+            if (params.showReplaceWarning) {
+                Text("replace today!")
+            }
+            if (params.showMainBlock) {
+                Text("Main block is shown")
+            }
+            if (params.showCompletedBlock) {
+                Text("Completed block is shown")
+            }
         }
     }
 }
