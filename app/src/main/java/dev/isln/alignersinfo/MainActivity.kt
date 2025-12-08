@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -73,32 +74,39 @@ fun MainScreen(navController: NavController) {
 
     Scaffold(modifier = Modifier.fillMaxSize().padding(12.dp)) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            Text("MainScreen")
+            Text("Aligners Info", fontSize = 24.sp)
+
             Spacer(modifier = Modifier.height(12.dp))
+
             Row(modifier = Modifier.fillMaxWidth()) {
                 Button(
                     modifier = Modifier.weight(1f),
                     onClick = { navController.navigate("SettingsScreen") },
                 ) { Text("Settings") }
             }
+
             Spacer(modifier = Modifier.height(12.dp))
-            Text("Percent: " + params.percent)
-            Text("Days passed: " + params.daysPassed)
-            Text("Days total: " + params.daysTotal)
-            Text("Current: " + params.current)
-            Text("Total: " + params.total)
-            Text("Replace in days: " + params.replaceInDays)
-            Text("Replace date: " + params.replaceDate)
-            Spacer(modifier = Modifier.height(12.dp))
+
             if (params.errorMessage.isNotEmpty()) {
                 Text("Error: " + params.errorMessage)
             }
+
             if (params.showReplaceWarning) {
-                Text("replace today!")
+                Spacer(modifier = Modifier.height(24.dp))
+                Text("Replace today!", fontSize = 32.sp)
+                Spacer(modifier = Modifier.height(24.dp))
             }
+
             if (params.showMainBlock) {
-                Text("Main block is shown")
+                Text("Aligner in use: " + params.current + " of " + params.total, fontSize = 24.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                Text("Days left: " + params.replaceInDays, fontSize = 24.sp)
+                Text("(replace date: " + params.replaceDate + ")")
+                Spacer(modifier = Modifier.height(12.dp))
+                Text("Progress: " + params.percent + "%", fontSize = 24.sp)
+                Text("(days passed: " + params.daysPassed + " of " + params.daysTotal + ")")
             }
+
             if (params.showCompletedBlock) {
                 Text("Completed block is shown")
             }
@@ -120,9 +128,9 @@ fun SettingsScreen(navController: NavController) {
         mutableStateOf(sharedPreferences.getString(TOTAL_ALIGNERS_KEY, DEFAULT_TOTAL_ALIGNERS) ?: "")
     }
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
+    Scaffold(modifier = Modifier.fillMaxSize().padding(12.dp)) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            Text("Settings screen")
+            Text("Aligners Info: Settings", fontSize = 20.sp)
             Spacer(modifier = Modifier.height(12.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
                 Button(
