@@ -30,14 +30,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.core.content.edit
 
-const val START_DATES = "start-dates"
-const val CHANGE_INTERVALS = "change-intervals"
+const val START_DATES_KEY = "start-dates"
+const val DEFAULT_START_DATES = "2025-05-15,2025-12-01"
+const val CHANGE_INTERVALS_KEY = "change-intervals"
+const val DEFAULT_CHANGE_INTERVALS = "10,7"
+const val TOTAL_ALIGNERS_KEY = "total-aligners"
+const val DEFAULT_TOTAL_ALIGNERS = "52"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val params = calculate()
 
         enableEdgeToEdge()
 
@@ -48,7 +50,7 @@ class MainActivity : ComponentActivity() {
                 startDestination = "MainScreen",
                 builder = {
                     composable("MainScreen") {
-                        MainScreen(navHostController, params)
+                        MainScreen(navHostController)
                     }
                     composable("SettingsScreen") {
                         SettingsScreen(navHostController)
@@ -60,7 +62,15 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(navController: NavController, params: MainScreenParams) {
+fun MainScreen(navController: NavController) {
+    val context = LocalContext.current
+    val sharedPreferences = remember { context.getSharedPreferences("AlignersInfoPrefs", Context.MODE_PRIVATE) }
+
+    val startDates = sharedPreferences.getString(START_DATES_KEY, DEFAULT_START_DATES) ?: ""
+    val changeIntervals = sharedPreferences.getString(CHANGE_INTERVALS_KEY, DEFAULT_CHANGE_INTERVALS) ?: ""
+    val totalAligners = sharedPreferences.getString(TOTAL_ALIGNERS_KEY, DEFAULT_TOTAL_ALIGNERS) ?: ""
+    val params = calculate(startDates, changeIntervals, totalAligners)
+
     Scaffold(modifier = Modifier.fillMaxSize().padding(12.dp)) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             Text("MainScreen")
@@ -101,10 +111,13 @@ fun SettingsScreen(navController: NavController) {
     val context = LocalContext.current
     val sharedPreferences = remember { context.getSharedPreferences("AlignersInfoPrefs", Context.MODE_PRIVATE) }
     var startDates by remember {
-        mutableStateOf(sharedPreferences.getString(START_DATES, "") ?: "")
+        mutableStateOf(sharedPreferences.getString(START_DATES_KEY, DEFAULT_START_DATES) ?: "")
     }
     var changeIntervals by remember {
-        mutableStateOf(sharedPreferences.getString(CHANGE_INTERVALS, "") ?: "")
+        mutableStateOf(sharedPreferences.getString(CHANGE_INTERVALS_KEY, DEFAULT_CHANGE_INTERVALS) ?: "")
+    }
+    var totalAligners by remember {
+        mutableStateOf(sharedPreferences.getString(TOTAL_ALIGNERS_KEY, DEFAULT_TOTAL_ALIGNERS) ?: "")
     }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
@@ -122,7 +135,7 @@ fun SettingsScreen(navController: NavController) {
                 value = startDates,
                 onValueChange = {
                     startDates = it
-                    sharedPreferences.edit { putString("saved_text", it) }
+                    sharedPreferences.edit { putString(START_DATES_KEY, it) }
                 },
                 label = { Text("Start dates") }
             )
@@ -131,9 +144,18 @@ fun SettingsScreen(navController: NavController) {
                 value = changeIntervals,
                 onValueChange = {
                     changeIntervals = it
-                    sharedPreferences.edit { putString("saved_text", it) }
+                    sharedPreferences.edit { putString(CHANGE_INTERVALS_KEY, it) }
                 },
                 label = { Text("Change intervals") }
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            TextField(
+                value = totalAligners,
+                onValueChange = {
+                    totalAligners = it
+                    sharedPreferences.edit { putString(TOTAL_ALIGNERS_KEY, it) }
+                },
+                label = { Text("Total aligners number") }
             )
         }
     }

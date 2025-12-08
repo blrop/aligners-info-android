@@ -76,12 +76,9 @@ fun getPreviousData(allStartDates: List<String>, allChangeIntervals:List<String>
 }
 
 @OptIn(ExperimentalTime::class)
-fun calculate(): MainScreenParams {
+fun calculate(startDatesRaw: String, changeIntervalsRaw: String, totalAlignersRaw: String): MainScreenParams {
     val params = MainScreenParams()
 
-    val startDatesRaw = "2025-05-15,2025-12-01"
-    val changeIntervalsRaw = "10,7"
-    val totalAlignersRaw = "52"
     val totalAligners = totalAlignersRaw.toInt()
 
     if (startDatesRaw.isEmpty() || changeIntervalsRaw.isEmpty() || totalAlignersRaw.isEmpty()) {
