@@ -30,6 +30,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.core.content.edit
 
+const val START_DATES = "start-dates"
+const val CHANGE_INTERVALS = "change-intervals"
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,26 +59,17 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(navController: NavController) {
-    var visible by remember { mutableStateOf(true) }
-
-
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             Text("MainScreen")
             Spacer(modifier = Modifier.height(12.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
-                if (visible) {
-                    Button(
-                        modifier = Modifier.weight(1f),
-                        onClick = { navController.navigate("SettingsScreen") },
-                    ) { Text("Goto Settings screen") }
-                }
-
                 Button(
                     modifier = Modifier.weight(1f),
-                    onClick = { visible = !visible }
-                ) { Text("Button 2") }
+                    onClick = { navController.navigate("SettingsScreen") },
+                ) { Text("Settings") }
             }
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }
@@ -84,8 +78,11 @@ fun MainScreen(navController: NavController) {
 fun SettingsScreen(navController: NavController) {
     val context = LocalContext.current
     val sharedPreferences = remember { context.getSharedPreferences("AlignersInfoPrefs", Context.MODE_PRIVATE) }
-    var text by remember {
-        mutableStateOf(sharedPreferences.getString("saved_text", "Hello") ?: "Hello")
+    var startDates by remember {
+        mutableStateOf(sharedPreferences.getString(START_DATES, "") ?: "")
+    }
+    var changeIntervals by remember {
+        mutableStateOf(sharedPreferences.getString(CHANGE_INTERVALS, "") ?: "")
     }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
@@ -100,12 +97,21 @@ fun SettingsScreen(navController: NavController) {
             }
             Spacer(modifier = Modifier.height(12.dp))
             TextField(
-                value = text,
+                value = startDates,
                 onValueChange = {
-                    text = it
+                    startDates = it
                     sharedPreferences.edit { putString("saved_text", it) }
                 },
-                label = { Text("Label") }
+                label = { Text("Start dates") }
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            TextField(
+                value = changeIntervals,
+                onValueChange = {
+                    changeIntervals = it
+                    sharedPreferences.edit { putString("saved_text", it) }
+                },
+                label = { Text("Change intervals") }
             )
         }
     }
